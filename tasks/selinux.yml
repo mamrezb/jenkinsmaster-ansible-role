@@ -1,0 +1,16 @@
+# tasks/selinux.yml
+
+- name: Check SELinux status
+  command: getenforce
+  register: selinux_status
+
+- name: Set SELinux to permissive mode
+  command: setenforce 0
+  when: selinux_status.stdout == "Enforcing"
+
+- name: Modify SELinux config file to set permissive mode on reboot
+  replace:
+    path: /etc/selinux/config
+    regexp: '^SELINUX=enforcing'
+    replace: 'SELINUX=permissive'
+  when: selinux_status.stdout == "Enforcing"

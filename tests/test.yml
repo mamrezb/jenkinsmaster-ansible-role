@@ -1,0 +1,6 @@
+# tests/test.yml
+
+- hosts: default
+  become: yes
+  roles:
+    - role: ../

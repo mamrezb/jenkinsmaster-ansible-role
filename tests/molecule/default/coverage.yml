@@ -1,0 +1,6 @@
+# tests/molecule/default/converge.yml
+
+- hosts: all
+  become: yes
+  roles:
+    - role: ../../../

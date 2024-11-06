@@ -1,0 +1,4 @@
+# tests/inventory
+
+[default]
+localhost ansible_connection=local

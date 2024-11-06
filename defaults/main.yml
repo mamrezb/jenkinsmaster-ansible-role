@@ -1,0 +1,23 @@
+# defaults/main.yml
+
+jenkins_docker_image: "jenkins/jenkins:lts"
+jenkins_container_name: "jenkinsmaster"
+jenkins_http_port: 8080
+jenkins_volumes:
+  - "/var/jenkins_home:/var/jenkins_home"
+
+jenkins_plugin_list:
+  - git
+  - ldap
+  - sonar
+  - jira
+  - github
+  - bitbucket
+  - gitlab
+
+docker_compose_version: "v2.30.1"
+
+# Optional: Custom Jenkins home directory
+jenkins_home_dir: "/var/jenkins_home"
+jenkins_admin_password: "your_custom_password"
+

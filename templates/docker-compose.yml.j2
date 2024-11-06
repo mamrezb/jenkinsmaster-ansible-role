@@ -1,0 +1,11 @@
+services:
+  jenkins:
+    image: "{{ jenkins_docker_image }}"
+    container_name: "{{ jenkins_container_name }}"
+    ports:
+      - "{{ jenkins_http_port }}:8080"
+    volumes:
+{% for volume in jenkins_volumes %}
+      - "{{ volume }}"
+{% endfor %}
+    restart: unless-stopped

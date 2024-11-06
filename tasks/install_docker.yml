@@ -1,0 +1,66 @@
+# tasks/install_docker.yml
+
+# Ubuntu/Debian Systems
+- block:
+    - name: Add Docker GPG key (Ubuntu/Debian)
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository (Ubuntu/Debian)
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Update APT package index (Ubuntu/Debian)
+      apt:
+        update_cache: yes
+
+    - name: Install Docker Engine and Docker Compose (Ubuntu/Debian)
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+
+    - name: Ensure Docker service is running (Ubuntu/Debian)
+      service:
+        name: docker
+        state: started
+        enabled: yes
+  when: ansible_os_family == 'Debian'
+
+# Red Hat Systems
+- block:
+    - name: Add Docker repository (Red Hat)
+      yum_repository:
+        name: docker-ce
+        description: Docker CE Repository
+        baseurl: "https://download.docker.com/linux/centos/$(rpm -E %{rhel})/x86_64/stable"
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://download.docker.com/linux/centos/gpg
+
+    - name: Install Docker Engine (Red Hat)
+      yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+
+    - name: Install Docker Compose (Red Hat)
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Ensure Docker service is running (Red Hat)
+      service:
+        name: docker
+        state: started
+        enabled: yes
+  when: ansible_os_family == 'RedHat'

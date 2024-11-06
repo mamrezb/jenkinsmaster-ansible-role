@@ -1,0 +1,19 @@
+# tests/molecule/default/tests/test_default.py
+
+import testinfra
+
+def test_docker_installed(host):
+    docker = host.package("docker-ce")
+    assert docker.is_installed
+
+def test_docker_compose_installed(host):
+    docker_compose = host.file("/usr/local/bin/docker-compose")
+    assert docker_compose.exists
+    assert docker_compose.mode == 0o755
+
+def test_jenkins_container_running(host):
+    jenkins = host.docker("jenkinsmaster")
+    assert jenkins.is_running
+
+def test_jenkins_port(host):
+    assert host.socket("tcp://0.0.0.0:8080").is_listening

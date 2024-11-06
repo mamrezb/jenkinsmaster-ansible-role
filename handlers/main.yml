@@ -1,0 +1,6 @@
+# handlers/main.yml
+
+- name: restart jenkins
+  shell: docker compose down && docker compose up -d
+  args:
+    chdir: "{{ jenkins_compose_dir }}"

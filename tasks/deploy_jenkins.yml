@@ -1,0 +1,45 @@
+# tasks/deploy_jenkins.yml
+
+- name: Create Jenkins home directory
+  file:
+    path: "{{ jenkins_home_dir }}"
+    state: directory
+    owner: 1000
+    group: 1000
+    mode: '0755'
+
+- name: Copy Jenkins configuration files
+  template:
+    src: "jenkins_home/{{ item }}"
+    dest: "{{ jenkins_home_dir }}/{{ item }}"
+    owner: 1000
+    group: 1000
+    mode: '0644'
+  with_fileglob:
+    - "jenkins_home/*"
+  when: jenkins_custom_config is defined
+
+- name: Create Docker Compose directory
+  set_fact:
+    jenkins_compose_dir: "/opt/jenkins_docker_compose"
+
+- name: Create Docker Compose directory
+  file:
+    path: "{{ jenkins_compose_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Deploy Docker Compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ jenkins_compose_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Bring up Jenkins container
+  shell: docker compose up -d
+  args:
+    chdir: "{{ jenkins_compose_dir }}"
