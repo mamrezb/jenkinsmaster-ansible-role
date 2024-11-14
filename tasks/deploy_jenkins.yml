@@ -8,16 +8,13 @@
     group: 1000
     mode: '0755'
 
-- name: Copy Jenkins configuration files
+- name: Copy Jenkins configuration as code file
   template:
-    src: "jenkins_home/{{ item }}"
-    dest: "{{ jenkins_home_dir }}/{{ item }}"
+    src: casc_config.yml.j2
+    dest: "{{ jenkins_home_dir }}/casc_config.yml"
     owner: 1000
     group: 1000
     mode: '0644'
-  with_fileglob:
-    - "jenkins_home/*"
-  when: jenkins_custom_config is defined
 
 - name: Create Docker Compose directory
   set_fact:
@@ -31,7 +28,7 @@
     group: root
     mode: '0755'
 
-- name: Deploy Docker Compose file
+- name: Copy Docker Compose file
   template:
     src: docker-compose.yml.j2
     dest: "{{ jenkins_compose_dir }}/docker-compose.yml"
@@ -39,7 +36,28 @@
     group: root
     mode: '0644'
 
+- name: Copy Dockerfile
+  template:
+    src: Dockerfile.j2
+    dest: "{{ jenkins_compose_dir }}/Dockerfile"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Check if custom Jenkins Docker image exists
+  shell: |
+    docker images -q jenkinsmaster:latest
+  register: docker_image_check
+  ignore_errors: true
+
+- name: Build custom Jenkins Docker image
+  shell: |
+    docker build -t jenkinsmaster:latest .
+  args:
+    chdir: "{{ jenkins_compose_dir }}"
+  when: docker_image_check.stdout == ""
+
 - name: Bring up Jenkins container
-  shell: docker compose up -d
+  shell: docker compose up -d --force-recreate
   args:
     chdir: "{{ jenkins_compose_dir }}"

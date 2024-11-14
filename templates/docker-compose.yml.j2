@@ -1,6 +1,6 @@
 services:
   jenkins:
-    image: "{{ jenkins_docker_image }}"
+    image: "jenkinsmaster:latest"
     container_name: "{{ jenkins_container_name }}"
     ports:
       - "{{ jenkins_http_port }}:8080"
@@ -8,4 +8,8 @@ services:
 {% for volume in jenkins_volumes %}
       - "{{ volume }}"
 {% endfor %}
+      # - "{{ jenkins_compose_dir }}/casc_config.yml:/var/jenkins_home/casc_config.yml"
+    environment:
+      - CASC_JENKINS_CONFIG=/var/jenkins_home/casc_config.yml
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
     restart: unless-stopped

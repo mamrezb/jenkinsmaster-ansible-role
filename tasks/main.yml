@@ -15,3 +15,6 @@
 
 - name: Deploy Jenkins using Docker Compose
   include_tasks: deploy_jenkins.yml
+
+- name: Install Jenkins plugins
+  include_tasks: install_plugins.yml
