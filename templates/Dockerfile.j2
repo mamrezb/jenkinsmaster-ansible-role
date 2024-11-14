@@ -1,5 +1,3 @@
 FROM "{{ jenkins_docker_image }}"
 
-RUN echo "configuration-as-code" > /usr/share/jenkins/ref/plugins.txt
-
-RUN jenkins-plugin-cli -f /usr/share/jenkins/ref/plugins.txt
+RUN jenkins-plugin-cli --plugins {% for plugin in jenkins_plugin_list %}{{ plugin }} {% endfor %}

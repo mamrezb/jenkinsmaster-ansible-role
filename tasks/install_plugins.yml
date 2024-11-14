@@ -1,8 +1,0 @@
-# tasks/install_plugins.yml
-
-- name: Install Jenkins plugins
-  shell: |
-    docker exec -t {{ jenkins_container_name }} /bin/bash -c "jenkins-plugin-cli --plugins {{ jenkins_plugin_list | join(' ') }}"
-  when: jenkins_plugin_list | length > 0
-  tags: install_plugins
-q

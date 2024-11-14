@@ -8,8 +8,7 @@ services:
 {% for volume in jenkins_volumes %}
       - "{{ volume }}"
 {% endfor %}
-      # - "{{ jenkins_compose_dir }}/casc_config.yml:/var/jenkins_home/casc_config.yml"
     environment:
-      - CASC_JENKINS_CONFIG=/var/jenkins_home/casc_config.yml
+      - CASC_JENKINS_CONFIG=/var/jenkins_home/casc_configs
       - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
     restart: unless-stopped

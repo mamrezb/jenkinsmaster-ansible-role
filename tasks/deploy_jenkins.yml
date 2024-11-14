@@ -8,13 +8,35 @@
     group: 1000
     mode: '0755'
 
+- name: Create Jenkins casc directory
+  file:
+    path: "{{ jenkins_home_dir }}/casc_configs"
+    state: directory
+    owner: 1000
+    group: 1000
+    mode: '0755'
+
 - name: Copy Jenkins configuration as code file
   template:
-    src: casc_config.yml.j2
-    dest: "{{ jenkins_home_dir }}/casc_config.yml"
+    src: casc_main.yml.j2
+    dest: "{{ jenkins_home_dir }}/casc_configs/main.yml"
     owner: 1000
     group: 1000
     mode: '0644'
+
+- name: Clone Job DSL repository
+  git:
+    repo: "{{ jenkins_job_dsl_repo }}"
+    dest: "{{ jenkins_home_dir }}/casc_configs/job-dsl"
+    version: main
+
+- name: Set ownership of Job DSL repository files
+  file:
+    path: "{{ jenkins_home_dir }}/casc_configs/job-dsl"
+    state: directory
+    owner: 1000
+    group: 1000
+    recurse: yes
 
 - name: Create Docker Compose directory
   set_fact:
@@ -44,18 +66,11 @@
     group: root
     mode: '0644'
 
-- name: Check if custom Jenkins Docker image exists
-  shell: |
-    docker images -q jenkinsmaster:latest
-  register: docker_image_check
-  ignore_errors: true
-
 - name: Build custom Jenkins Docker image
   shell: |
     docker build -t jenkinsmaster:latest .
   args:
     chdir: "{{ jenkins_compose_dir }}"
-  when: docker_image_check.stdout == ""
 
 - name: Bring up Jenkins container
   shell: docker compose up -d --force-recreate

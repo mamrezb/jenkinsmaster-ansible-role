@@ -7,6 +7,8 @@ jenkins_volumes:
   - "/var/jenkins_home:/var/jenkins_home"
 
 jenkins_plugin_list:
+  - configuration-as-code
+  - job-dsl
   - git
   - ldap
   - sonar
@@ -21,3 +23,4 @@ jenkins_home_dir: "/var/jenkins_home"
 jenkins_admin_user: "admin"
 jenkins_admin_password: "your_custom_password"
 
+jenkins_job_dsl_repo: "https://github.com/mamrezb/jenkinsmaster-job-dsl.git"

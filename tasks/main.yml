@@ -1,20 +1,17 @@
 # tasks/main.yml
 
-- name: Install system dependencies
-  include_tasks: install_dependencies.yml
+# - name: Install system dependencies
+#   include_tasks: install_dependencies.yml
 
-- name: Install Docker and Docker Compose
-  include_tasks: install_docker.yml
+# - name: Install Docker and Docker Compose
+#   include_tasks: install_docker.yml
 
-- name: Handle SELinux settings (Red Hat)
-  include_tasks: selinux.yml
-  when: ansible_os_family == 'RedHat'
+# - name: Handle SELinux settings (Red Hat)
+#   include_tasks: selinux.yml
+#   when: ansible_os_family == 'RedHat'
 
-- name: Configure firewall
-  include_tasks: configure_firewall.yml
+# - name: Configure firewall
+#   include_tasks: configure_firewall.yml
 
 - name: Deploy Jenkins using Docker Compose
   include_tasks: deploy_jenkins.yml
-
-- name: Install Jenkins plugins
-  include_tasks: install_plugins.yml
