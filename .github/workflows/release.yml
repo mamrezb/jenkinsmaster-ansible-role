@@ -28,4 +28,4 @@ jobs:
         env:
           ANSIBLE_GALAXY_TOKEN: ${{ secrets.GALAXY_API_TOKEN }}
         run: |
-          ansible-galaxy role import yourusername jenkinsmaster-ansible-role --token $ANSIBLE_GALAXY_TOKEN
+          ansible-galaxy role import mamrezb jenkinsmaster --token $ANSIBLE_GALAXY_TOKEN

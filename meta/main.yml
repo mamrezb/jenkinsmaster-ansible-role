@@ -29,4 +29,6 @@ galaxy_info:
     - cicd
     - devops
     - automation
+  namespace: mamrezb
+  role_name: jenkinsmaster
 dependencies: []
