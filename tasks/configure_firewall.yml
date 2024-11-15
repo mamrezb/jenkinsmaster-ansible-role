@@ -1,46 +1,48 @@
 # tasks/configure_firewall.yml
 
 # Red Hat Systems
-- block:
+- name: Configure firewall
+  block:
     - name: Install firewalld (Red Hat)
-      yum:
+      ansible.builtin.dnf:
         name: firewalld
         state: present
 
     - name: Start and enable firewalld (Red Hat)
-      service:
+      ansible.builtin.service:
         name: firewalld
         state: started
-        enabled: yes
+        enabled: true
 
     - name: Open port for Jenkins in firewalld (Red Hat)
-      firewalld:
+      ansible.builtin.firewalld:
         port: "{{ jenkins_http_port }}/tcp"
-        permanent: yes
+        permanent: true
         state: enabled
-        immediate: yes
+        immediate: true
   when: ansible_os_family == 'RedHat'
 
 # Ubuntu/Debian Systems
-- block:
+- name: Configure firewall
+  block:
     - name: Install UFW (Ubuntu/Debian)
-      apt:
+      ansible.builtin.apt:
         name: ufw
         state: present
 
     - name: Allow Jenkins port in UFW (Ubuntu/Debian)
-      ufw:
+      comminity.general.ufw:
         rule: allow
         port: "{{ jenkins_http_port }}"
         proto: tcp
 
     - name: Allow SSH in UFW (Ubuntu/Debian)
-      ufw:
+      comminity.general.ufw:
         rule: allow
         port: 22
         proto: tcp
 
     - name: Enable UFW (Ubuntu/Debian)
-      ufw:
+      comminity.general.ufw:
         state: enabled
   when: ansible_os_family == 'Debian'

@@ -14,4 +14,4 @@
 #   include_tasks: configure_firewall.yml
 
 - name: Deploy Jenkins using Docker Compose
-  include_tasks: deploy_jenkins.yml
+  ansible.builtin.include_tasks: deploy_jenkins.yml

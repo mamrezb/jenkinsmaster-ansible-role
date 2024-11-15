@@ -1,6 +1,7 @@
 # tests/test.yml
 
-- hosts: default
-  become: yes
+- name: Test Jenkins Master Role
+  hosts: default
+  become: true
   roles:
     - role: ../

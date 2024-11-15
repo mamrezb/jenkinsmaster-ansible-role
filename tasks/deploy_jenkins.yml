@@ -1,7 +1,7 @@
 # tasks/deploy_jenkins.yml
 
 - name: Create Jenkins home directory
-  file:
+  ansible.builtin.file:
     path: "{{ jenkins_home_dir }}"
     state: directory
     owner: 1000
@@ -9,7 +9,7 @@
     mode: '0755'
 
 - name: Create Jenkins casc directory
-  file:
+  ansible.builtin.file:
     path: "{{ jenkins_home_dir }}/casc_configs"
     state: directory
     owner: 1000
@@ -17,7 +17,7 @@
     mode: '0755'
 
 - name: Copy Jenkins configuration as code file
-  template:
+  ansible.builtin.template:
     src: casc_main.yml.j2
     dest: "{{ jenkins_home_dir }}/casc_configs/main.yml"
     owner: 1000
@@ -25,25 +25,26 @@
     mode: '0644'
 
 - name: Configure Git to recognize the directory as safe
-  shell: git config --global --add safe.directory {{ jenkins_home_dir }}/casc_configs/job-dsl
-  become: yes
+  ansible.builtin.command:
+    cmd: git config --global --add safe.directory {{ jenkins_home_dir }}/casc_configs/job-dsl
+  become: true
 
 - name: Clone Job DSL repository
-  git:
+  ansible.builtin.git:
     repo: "{{ jenkins_job_dsl_repo }}"
     dest: "{{ jenkins_home_dir }}/casc_configs/job-dsl"
     version: main
 
 - name: Set ownership of Job DSL repository files
-  file:
+  ansible.builtin.file:
     path: "{{ jenkins_home_dir }}/casc_configs/job-dsl"
     state: directory
     owner: 1000
     group: 1000
-    recurse: yes
+    recurse: true
 
 - name: Configure Jenkins Shared Libraries
-  template:
+  ansible.builtin.template:
     src: casc_shared_libraries.yml.j2
     dest: "{{ jenkins_home_dir }}/casc_configs/shared_libraries.yml"
     owner: 1000
@@ -51,11 +52,11 @@
     mode: '0644'
 
 - name: Create Docker Compose directory
-  set_fact:
+  ansible.builtin.set_fact:
     jenkins_compose_dir: "/opt/jenkins_docker_compose"
 
 - name: Create Docker Compose directory
-  file:
+  ansible.builtin.file:
     path: "{{ jenkins_compose_dir }}"
     state: directory
     owner: root
@@ -63,15 +64,24 @@
     mode: '0755'
 
 - name: Copy Docker Compose file
-  template:
+  ansible.builtin.template:
     src: docker-compose.yml.j2
     dest: "{{ jenkins_compose_dir }}/docker-compose.yml"
     owner: root
     group: root
     mode: '0644'
 
+- name: Get Docker group ID on host
+  ansible.builtin.shell: "getent group docker | cut -d: -f3"
+  register: docker_gid_output
+  changed_when: false
+
+- name: Set Docker GID fact
+  ansible.builtin.set_fact:
+    docker_gid: "{{ docker_gid_output.stdout }}"
+
 - name: Copy Dockerfile
-  template:
+  ansible.builtin.template:
     src: Dockerfile.j2
     dest: "{{ jenkins_compose_dir }}/Dockerfile"
     owner: root
@@ -80,21 +90,15 @@
   vars:
     docker_gid: "{{ docker_gid }}"
 
-- name: Get Docker group ID on host
-  shell: "getent group docker | cut -d: -f3"
-  register: docker_gid_output
-
-- name: Set Docker GID fact
-  set_fact:
-    docker_gid: "{{ docker_gid_output.stdout }}"
-
 - name: Build custom Jenkins Docker image
-  shell: |
+  ansible.builtin.shell: |
+    set -o pipefail
     docker build --build-arg DOCKER_GID={{ docker_gid }} -t jenkinsmaster:latest .
   args:
     chdir: "{{ jenkins_compose_dir }}"
 
 - name: Bring up Jenkins container
-  shell: docker compose up -d --force-recreate
-  args:
+  ansible.builtin.command:
+    cmd: docker compose up -d --force-recreate
     chdir: "{{ jenkins_compose_dir }}"
+  changed_when: false

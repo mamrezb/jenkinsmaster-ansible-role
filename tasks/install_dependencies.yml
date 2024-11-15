@@ -1,12 +1,12 @@
 # tasks/install_dependencies.yml
 
 - name: Update package index (Ubuntu/Debian)
-  apt:
-    update_cache: yes
+  ansible.builtin.apt:
+    update_cache: true
   when: ansible_os_family == 'Debian'
 
 - name: Install required packages (Ubuntu/Debian)
-  apt:
+  ansible.builtin.apt:
     name:
       - ca-certificates
       - curl
@@ -16,7 +16,7 @@
   when: ansible_os_family == 'Debian'
 
 - name: Install required packages (Red Hat)
-  yum:
+  ansible.builtin.dnf:
     name:
       - yum-utils
       - device-mapper-persistent-data
