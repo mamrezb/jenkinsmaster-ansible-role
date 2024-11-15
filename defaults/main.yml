@@ -10,6 +10,7 @@ jenkins_volumes:
 jenkins_plugin_list:
   - configuration-as-code
   - job-dsl
+  - pipeline-groovy-lib
   - git
   - ldap
   - sonar
@@ -25,3 +26,4 @@ jenkins_admin_user: "admin"
 jenkins_admin_password: "your_custom_password"
 
 jenkins_job_dsl_repo: "https://github.com/mamrezb/jenkinsmaster-job-dsl.git"
+jenkins_shared_library_repo: "https://github.com/mamrezb/jenkinsmaster-shared-library.git"

@@ -1,0 +1,10 @@
+unclassified:
+  globalLibraries:
+    libraries:
+      - name: "custom-shared-lib"
+        defaultVersion: "main"
+        retriever:
+          modernSCM:
+            scm:
+              git:
+                remote: {{ jenkins_shared_library_repo }}

@@ -24,6 +24,10 @@
     group: 1000
     mode: '0644'
 
+- name: Configure Git to recognize the directory as safe
+  shell: git config --global --add safe.directory {{ jenkins_home_dir }}/casc_configs/job-dsl
+  become: yes
+
 - name: Clone Job DSL repository
   git:
     repo: "{{ jenkins_job_dsl_repo }}"
@@ -37,6 +41,14 @@
     owner: 1000
     group: 1000
     recurse: yes
+
+- name: Configure Jenkins Shared Libraries
+  template:
+    src: casc_shared_libraries.yml.j2
+    dest: "{{ jenkins_home_dir }}/casc_configs/shared_libraries.yml"
+    owner: 1000
+    group: 1000
+    mode: '0644'
 
 - name: Create Docker Compose directory
   set_fact:
