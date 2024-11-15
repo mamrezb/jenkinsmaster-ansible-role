@@ -5,6 +5,7 @@ jenkins_container_name: "jenkinsmaster"
 jenkins_http_port: 8080
 jenkins_volumes:
   - "/var/jenkins_home:/var/jenkins_home"
+  - "/var/run/docker.sock:/var/run/docker.sock"
 
 jenkins_plugin_list:
   - configuration-as-code

@@ -65,10 +65,20 @@
     owner: root
     group: root
     mode: '0644'
+  vars:
+    docker_gid: "{{ docker_gid }}"
+
+- name: Get Docker group ID on host
+  shell: "getent group docker | cut -d: -f3"
+  register: docker_gid_output
+
+- name: Set Docker GID fact
+  set_fact:
+    docker_gid: "{{ docker_gid_output.stdout }}"
 
 - name: Build custom Jenkins Docker image
   shell: |
-    docker build -t jenkinsmaster:latest .
+    docker build --build-arg DOCKER_GID={{ docker_gid }} -t jenkinsmaster:latest .
   args:
     chdir: "{{ jenkins_compose_dir }}"
 
