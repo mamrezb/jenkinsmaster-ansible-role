@@ -31,18 +31,18 @@
         state: present
 
     - name: Allow Jenkins port in UFW (Ubuntu/Debian)
-      comminity.general.ufw:
+      community.general.ufw:
         rule: allow
         port: "{{ jenkins_http_port }}"
         proto: tcp
 
     - name: Allow SSH in UFW (Ubuntu/Debian)
-      comminity.general.ufw:
+      community.general.ufw:
         rule: allow
         port: 22
         proto: tcp
 
     - name: Enable UFW (Ubuntu/Debian)
-      comminity.general.ufw:
+      community.general.ufw:
         state: enabled
   when: ansible_os_family == 'Debian'
