@@ -92,7 +92,6 @@
 
 - name: Build custom Jenkins Docker image
   ansible.builtin.shell: |
-    set -o pipefail
     docker build --build-arg DOCKER_GID={{ docker_gid }} -t jenkinsmaster:latest .
   args:
     chdir: "{{ jenkins_compose_dir }}"
