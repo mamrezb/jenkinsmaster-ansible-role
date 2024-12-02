@@ -1,24 +1,45 @@
 # tasks/install_docker.yml
 
+# Map architecture for Docker repository
+- name: Determine Docker repository architecture
+  set_fact:
+    docker_repo_arch: "{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' }}"
+  when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
+
 # Ubuntu/Debian Systems
-- name: Install Docker and Docker Compose
+- name: Install Docker and Docker Compose on Ubuntu/Debian
   block:
+    - name: Check if Docker is installed (Ubuntu/Debian)
+      ansible.builtin.shell: "dpkg -l | grep -E '^ii' | grep docker-ce"
+      register: docker_installed
+      failed_when: false
+      changed_when: false
+
+    - name: Check if Docker Compose plugin is installed (Ubuntu/Debian)
+      ansible.builtin.shell: "dpkg -l | grep -E '^ii' | grep docker-compose-plugin"
+      register: compose_installed
+      failed_when: false
+      changed_when: false
+
     - name: Add Docker GPG key (Ubuntu/Debian)
       ansible.builtin.apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
+      when: docker_installed.stdout == "" or compose_installed.stdout == ""
 
     - name: Add Docker repository (Ubuntu/Debian)
       ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        repo: "deb [arch={{ docker_repo_arch }}] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
         state: present
         filename: docker
+      when: docker_installed.stdout == "" or compose_installed.stdout == ""
 
     - name: Update APT package index (Ubuntu/Debian)
       ansible.builtin.apt:
         update_cache: true
+      when: docker_installed.stdout == "" or compose_installed.stdout == ""
 
-    - name: Install Docker Engine and Docker Compose (Ubuntu/Debian)
+    - name: Install Docker Engine and Docker Compose plugin (Ubuntu/Debian)
       ansible.builtin.apt:
         name:
           - docker-ce
@@ -26,6 +47,7 @@
           - containerd.io
           - docker-compose-plugin
         state: present
+      when: docker_installed.stdout == "" or compose_installed.stdout == ""
 
     - name: Ensure Docker service is running (Ubuntu/Debian)
       ansible.builtin.service:
@@ -35,30 +57,47 @@
   when: ansible_os_family == 'Debian'
 
 # Red Hat Systems
-- name: Install Docker and Docker Compose
+- name: Install Docker and Docker Compose on Red Hat
   block:
+    - name: Check if Docker is installed (Red Hat)
+      ansible.builtin.shell: "rpm -q docker-ce"
+      register: docker_check
+      failed_when: false
+      changed_when: false
+
+    - name: Check if Docker Compose plugin is installed (Red Hat)
+      ansible.builtin.shell: "rpm -q docker-compose-plugin"
+      register: compose_check
+      failed_when: false
+      changed_when: false
+
+    - name: Set Docker installed fact (Red Hat)
+      set_fact:
+        docker_installed: "{{ docker_check.rc == 0 }}"
+
+    - name: Set Docker Compose plugin installed fact (Red Hat)
+      set_fact:
+        compose_installed: "{{ compose_check.rc == 0 }}"
+
     - name: Add Docker repository (Red Hat)
       ansible.builtin.yum_repository:
         name: docker-ce
         description: Docker CE Repository
-        baseurl: "https://download.docker.com/linux/centos/$(rpm -E %{rhel})/x86_64/stable"
+        baseurl: "https://download.docker.com/linux/centos/$releasever/{{ ansible_architecture }}/stable"
         enabled: true
         gpgcheck: true
         gpgkey: https://download.docker.com/linux/centos/gpg
+      when: not docker_installed or not compose_installed
 
-    - name: Install Docker Engine (Red Hat)
+    - name: Install Docker Engine and Docker Compose plugin (Red Hat)
       ansible.builtin.dnf:
         name:
           - docker-ce
           - docker-ce-cli
           - containerd.io
+          - docker-compose-plugin
         state: present
-
-    - name: Install Docker Compose (Red Hat)
-      ansible.builtin.get_url:
-        url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
-        dest: /usr/local/bin/docker-compose
-        mode: '0755'
+      when: not docker_installed or not compose_installed
 
     - name: Ensure Docker service is running (Red Hat)
       ansible.builtin.service:
